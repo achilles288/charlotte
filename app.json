@@ -1,0 +1,22 @@
+{
+  "name": "Charlotte",
+  "description": "A discord bot for the Hantharwaddy guild",
+  "image": "heroku/python",
+  "repository": "https://github.com/heroku/python-getting-started",
+  "keywords": ["python", "discord" ],
+  "addons": [],
+  "env": {
+    "SECRET_KEY": {
+      "description": "The secret key for the application.",
+      "generator": "D7(m/<"
+    }
+  },
+  "environments": {
+    "test": {
+      "scripts": {
+        "test-setup": "",
+        "test": "python main.py"
+      }
+    }
+  }
+}
