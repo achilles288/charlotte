@@ -1,5 +1,5 @@
 discord
+fast-youtube-search
+pafy
 pillow
-PyNaCl
 requests
-youtube_dl

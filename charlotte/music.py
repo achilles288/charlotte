@@ -1,16 +1,15 @@
 import asyncio
 import discord
+import pafy
 import random
 
-from youtube_dl import YoutubeDL
-from youtube_dl.utils import DownloadError
+from fast_youtube_search import search_youtube
 
 
 
 
 client = 'x'
 
-ydl_options = {'format':'bestaudio', 'noplaylist':'True'}
 ffmpeg_options = {
   'before_options':'-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
   'options':'-vn'
@@ -39,24 +38,22 @@ class Song():
     self.title = None
     self.duration = 'n/a'
     
-    with YoutubeDL(ydl_options) as ydl:
-      try:
-        info = ydl.extract_info('ytsearch:{0}'.format(name), download=False)
-        entry = info['entries'][0]
-        self.source = entry['formats'][0]['url']
-        self.title = entry['title']
-        # ms = info['duration']
-        # if ms > 3600000:
-        #   h = int(ms/3600000)
-        #   m = int(ms/60000) % 3600000
-        #   s = int(ms/1000) % 60000
-        #   self.duration = '{:01d}:{:02d}:{:02d}'.format(h, m, s)
-        # else:
-        #   m = int(ms/60000)
-        #   s = int(ms/1000) % 60000
-        #   self.duration = '{:02d}:{:02d}'.format(m, s)
-      except DownloadError:
-        print('Failed to search music')
+    try:
+      results = search_youtube(name.split(' '))
+      p = pafy.new(results[0]['id'])
+      self.source = p.getbestaudio().url
+      self.title = p.title
+      if p.length > 3600:
+        h = int(p.length/3600)
+        m = int(p.length/60) % 60
+        s = int(p.length) % 60
+        self.duration = '{:01d}:{:02d}:{:02d}'.format(h, m, s)
+      else:
+        m = int(p.length/60)
+        s = int(p.length) % 60
+        self.duration = '{:02d}:{:02d}'.format(m, s)
+    except Exception as e:
+      print('Failed to search music: ' + str(e))
 
 
 
@@ -194,9 +191,9 @@ class MusicPlayer():
     i = random.randrange(len(texts))
     msg = texts[i]
     if self.now_playing:
-      msg += '\nNow: {0.title}'.format(self.now_playing)
+      msg += '\nNow: {0.title} [{0.duration}]'.format(self.now_playing)
     for i in range(len(self.music_queue)):
-      msg += '\n{0}. {1.title}'.format(i+1, self.music_queue[i])
+      msg += '\n{0}. {1.title} [{1.duration}]'.format(i+1, self.music_queue[i])
     if ctx:
       await ctx.send(msg)
     else:
